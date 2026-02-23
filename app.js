@@ -20,6 +20,7 @@ dbConnection();
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
 
+// Endpoints
 app.use("/api", authRoutes);
 app.use("/api", productRoutes);
 
