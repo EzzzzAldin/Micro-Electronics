@@ -24,6 +24,7 @@ const productRoutes = require("./routes/productRoutes");
 app.use("/api", authRoutes);
 app.use("/api", productRoutes);
 
+// Run Server
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);
 });
