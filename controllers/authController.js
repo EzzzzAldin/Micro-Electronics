@@ -1,14 +1,26 @@
 const User = require("../models/User");
 
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+
+const { registerSchema, loginSchema } = require("./validation/authValidation");
 
 const register = async (req, res) => {
   try {
-    // get Data
-    const { username, email, password, role } = req.body;
-    // Validated Data
-    if (!username || !email || !password)
-      return res.status(400).json({ msg: "Missing Data" });
+    // Joi Validation
+    const { error, value } = registerSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
+
+    if (error) {
+      return res.status(400).json({
+        msg: "Validation Error",
+        errors: error.details.map((err) => err.message),
+      });
+    }
+
+    const { username, email, password, role } = value;
 
     const existUser = await User.findOne({ email });
     if (existUser)
@@ -36,10 +48,19 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     // Get Data
-    const { email, password } = req.body;
+    const { error, value } = loginSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
     // Validated Data
-    if (!email || !password)
-      return res.status(400).json({ msg: "Missing Data" });
+    if (error) {
+      return res.status(400).json({
+        msg: "Validation Error",
+        errors: error.details.map((err) => err.message),
+      });
+    }
+
+    const { email, password } = value;
 
     const user = await User.findOne({ email });
     if (!user)
@@ -52,8 +73,15 @@ const login = async (req, res) => {
     if (!matchPassword)
       return res.status(400).json({ msg: "Invalid Password" });
 
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" },
+    );
+
     res.status(200).json({
       msg: "Success Login",
+      token,
     });
   } catch (error) {
     console.log(error);

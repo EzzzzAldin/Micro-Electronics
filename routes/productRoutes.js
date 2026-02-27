@@ -8,7 +8,9 @@ const {
   getSearchProductController,
 } = require("../controllers/productController");
 
-router.post("/product", addProductController);
+const authMiddleware = require("../Middlewares/authMiddleware");
+
+router.post("/product", authMiddleware, addProductController);
 
 router.get("/products", getProductController);
 router.get("/products/search", getSearchProductController);

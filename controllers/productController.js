@@ -1,27 +1,37 @@
 const Product = require("../models/Product");
 const User = require("../models/User");
 
+const addProductSchema = require("./validation/productsValidation");
+
 const addProductController = async (req, res) => {
   try {
-    const { name, price, stock, userId } = req.body;
+    const { error, value } = addProductSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
-    if (!name || !price || !stock)
-      return res.status(400).json({ msg: "Missing data" });
-
-    const checkAdmin = await User.findById(userId);
-
-    if (checkAdmin.role !== "admin")
-      return res.status(403).json({ msg: "Only admin can add products" });
-
-    if (!checkAdmin) {
-      return res.status(400).json({ msg: "User not found" });
+    if (error) {
+      return res.status(400).json({
+        msg: "Validation Error",
+        errors: error.details.map((err) => err.message),
+      });
     }
 
-    const product = await Product.create({
-      name,
-      price,
-      stock,
-    });
+    const { name, price, stock, userId } = value;
+
+    // if (!name || !price || !stock)
+    //   return res.status(400).json({ msg: "Missing data" });
+
+    // const checkAdmin = await User.findById(userId);
+
+    if (req.user.role !== "admin")
+      return res.status(403).json({ msg: "Only admin can add products" });
+
+    // if (!checkAdmin) {
+    //   return res.status(400).json({ msg: "User not found" });
+    // }
+
+    const product = await Product.create(value);
     res.status(201).json({ msg: "Product created", product });
   } catch (error) {
     res.status(500).json({ msg: "Server Error" });
