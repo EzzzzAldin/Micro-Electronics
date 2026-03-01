@@ -11,3 +11,5 @@ const {
 router.post("/cart", addCartController);
 
 router.get("/cart", getCartController);
+
+module.exports = router;

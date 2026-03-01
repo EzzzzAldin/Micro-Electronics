@@ -19,10 +19,12 @@ dbConnection();
 // Require Routes
 const authRoutes = require("./routes/authRoutes");
 const productRoutes = require("./routes/productRoutes");
+const cartRoutes = require("./routes/cartRoutes");
 
 // Endpoints
 app.use("/api", authRoutes);
 app.use("/api", productRoutes);
+app.use("/api", cartRoutes);
 
 // Run Server
 app.listen(port, () => {

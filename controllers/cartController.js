@@ -21,10 +21,32 @@ const addCartController = async (req, res) => {
     if (quantity > product.stock)
       return res.json({ msg: "quantity Large Stock " });
 
-    let cart = await Cart.find({ user: userId });
+    let cart = await Cart.findOne({ user: userId });
 
     if (!cart) cart = await Cart.create({ user, items: [] });
-  } catch (error) {}
+
+    // Add Product Or Updated quantity
+    const itemsIndex = cart.items.findIndex((item) => {
+      item.product.equals(productId);
+    });
+
+    if (itemsIndex > -1) {
+      cart.items[itemsIndex].quantity += quantity;
+    } else {
+      cart.items.push({ product: productId, quantity });
+    }
+
+    await cart.save();
+    product.stock -= quantity;
+    await product.save();
+
+    res.status(201).json({
+      msg: "Done Add Product In Cart",
+      data: cart,
+    });
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
 
 const getCartController = async (req, res) => {

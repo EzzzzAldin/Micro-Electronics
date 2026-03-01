@@ -1,20 +1,33 @@
 const Product = require("../models/Product");
 const User = require("../models/User");
 
+const jwt = require("jsonwebtoken");
+
 const addProductController = async (req, res) => {
   try {
-    const { name, price, stock, userId } = req.body;
+    const { name, price, stock } = req.body;
 
     if (!name || !price || !stock)
       return res.status(400).json({ msg: "Missing data" });
 
-    const checkAdmin = await User.findById(userId);
+    // const checkAdmin = await User.findById(userId);
 
-    if (checkAdmin.role !== "admin")
-      return res.status(403).json({ msg: "Only admin can add products" });
+    // if (checkAdmin.role !== "admin")
+    //   return res.status(403).json({ msg: "Only admin can add products" });
 
-    if (!checkAdmin) {
-      return res.status(400).json({ msg: "User not found" });
+    // if (!checkAdmin) {
+    //   return res.status(400).json({ msg: "User not found" });
+    // }
+
+    // get Token
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can add products" });
     }
 
     const product = await Product.create({
