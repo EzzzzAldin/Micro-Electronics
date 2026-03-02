@@ -49,10 +49,15 @@ const addCartController = async (req, res) => {
   }
 };
 
+/////////////////////////
 const getCartController = async (req, res) => {
   try {
+    
+
   } catch (error) {}
 };
+
+/////////////////
 const removeItemCartController = async (req, res) => {
   try {
   } catch (error) {}
