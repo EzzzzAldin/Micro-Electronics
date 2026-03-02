@@ -64,8 +64,35 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+const removeProductByAdmin = async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) return res.status(400).json({ msg: "Missing Data" });
+    const authHeader = req.headers.authorization;
+    if (!authHeader)
+      return res.status(401).json({ msg: "Unauthorized Action!" });
+
+    const token = authHeader.split(" ")[1];
+    if (!token) return res.status(401).json({ msg: "Unauthorized Action!" });
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can add products" });
+    }
+    const product = await Product.findByIdAndDelete(productId);
+    if (!product) return res.status(400).json({ msg: "Product Not found" });
+    res
+      .status(200)
+      .json({ msg: "product removed successfully", data: product });
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
+};
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  removeProductByAdmin,
 };
