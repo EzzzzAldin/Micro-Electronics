@@ -3,23 +3,24 @@ const Cart = require("../models/Cart");
 const User = require("../models/User");
 
 const jwt = require("jsonwebtoken")
+
+
+
 const addCartController = async (req, res) => {
   try {
 
     const authHeader = req.headers.authorization;
     
     const token = authHeader.split(" ")[1];
-    
+        
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-     //console.log(decodedToken);
-      
+
+    const userId = decodedToken.id;
     // get Data
     const { productId, quantity } = req.body;
     // Validated Data
-    if (!decodedToken || !productId || !quantity)
-      return res.status(400).json({ msg: "Missing Data" });
+    if (!decodedToken || !productId || !quantity)  return res.status(400).json({ msg: "Missing Data" });
 
-    const userId = decodedToken.id
     const user = await User.findById(userId);
 
     if (!user) return res.status(404).json({ msg: "User Not Found" });
@@ -62,15 +63,62 @@ const addCartController = async (req, res) => {
 const getCartController = async (req, res) => {
   try {
 
+    const data = await Cart.find().populate({path:"items.product",select:"name price"});
 
-  } catch (error) {}
+    if (!data) {
+      return res.status(404).json({ msg: "Cart not found" });
+    }
+
+    res.status(200).json(data);
+  } catch (error) {
+      res.status(500).json({ msg: "Server Error", error: error.message }); 
+  }
 };
 
 
 
 const removeItemCartController = async (req, res) => {
-  try {
-  } catch (error) {}
+try {
+  const authHeader = req.headers.authorization;
+    
+  const token = authHeader.split(" ")[1];
+      
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+  // const userId = decodedToken.id;
+
+  const { userId, productId } = req.params;
+
+    const cart = await Cart.findOne({ user: userId });
+
+    if (!cart) {
+      return res.status(404).json({ msg: "Cart not found" });
+    }
+
+    const itemIndex = cart.items.findIndex(
+      item => item.product.toString() === productId
+    );
+
+    if (itemIndex === -1) {
+      return res.status(404).json({ msg: "Product not found in cart" });
+    }
+
+    // 🔥 هنا بنستخدم splice
+    cart.items.splice(itemIndex, 1);
+
+    await cart.save();
+
+    res.status(200).json({
+      msg: "Item removed successfully",
+      cart
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      msg: "Server Error",
+      error: error.message
+    });
+  }
 };
 
 module.exports = {
