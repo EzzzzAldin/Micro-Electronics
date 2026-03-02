@@ -64,8 +64,49 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+
+
+// delete product ( 2/3/2026 )
+
+const deleteProductController = async (req, res) => {
+  try {
+    // 1. Get the ID from params (standard for DELETE requests)
+    const { id } = req.params;
+
+    // 2. Get and Verify Token
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ msg: "No token provided" });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    // 3. Role Check
+    if (decodedToken.role !== "admin") {
+      return res.status(403).json({ msg: "Only admin can delete products" });
+    }
+
+    // 4. Delete the product
+    const deletedProduct = await Product.findByIdAndDelete(id);
+
+    if (!deletedProduct) {
+      return res.status(404).json({ msg: "Product not found" });
+    }
+
+    res.status(200).json({ msg: "Product deleted successfully", deletedProduct });
+  } catch (error) {
+    // Handle specific JWT errors or generic server errors
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({ msg: "Invalid token" });
+    }
+    res.status(500).json({ msg: "Server Error" });
+  }
+};
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  deleteProductController
 };
