@@ -12,4 +12,6 @@ router.post("/cart", addCartController);
 
 router.get("/cart", getCartController);
 
+router.get("/cart" , removeItemCartController)
+
 module.exports = router;

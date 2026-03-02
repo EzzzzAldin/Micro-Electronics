@@ -51,11 +51,48 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const { userId } = req.query;
+
+    if (!userId) return res.status(400).json({ msg: "Missing User ID" });
+
+    const cart = await Cart.findOne({ user: userId }).populate("items.product");
+    
+    if (!cart) return res.status(404).json({ msg: "Cart Not Found" });
+    res.json(cart);
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
 const removeItemCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const { userId, productId } = req.body;
+
+    if (!userId || !productId)
+      return res.status(400).json({ msg: "Missing Data" });
+    
+    const cart = await Cart.findOne({ user: userId });
+
+    if (!cart) return res.status(404).json({ msg: "Cart Not Found" });
+
+    const itemsIndex = cart.items.findIndex((item) => {
+      item.product.equals(productId);
+    });
+
+    if (itemsIndex === -1)
+      return res.status(404).json({ msg: "Product Not Found In Cart" });
+
+
+  cart.items.splice(itemIndex, 1);
+  await cart.save();
+  
+  return res.status(200).json({
+      msg: "Item removed successfully",
+      cart: cart
+    });
+    
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
 
 module.exports = {
