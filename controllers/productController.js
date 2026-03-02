@@ -64,8 +64,56 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+// DELETE Product
+
+const deleteproductController =  async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    const product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found"
+      });
+    }
+
+     const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can delete products" });
+    }
+
+    res.status(200).json({
+      message: "Product deleted successfully",
+      product
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "error"
+    });
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  deleteproductController
 };
