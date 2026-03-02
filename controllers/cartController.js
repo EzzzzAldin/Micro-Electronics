@@ -51,7 +51,12 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const carts = await Cart.find();
+    res.json(carts);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({msg: "Server Error!", error: error.message});
+  }
 };
 const removeItemCartController = async (req, res) => {
   try {
