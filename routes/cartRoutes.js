@@ -5,7 +5,7 @@ const router = express.Router();
 const {
   addCartController,
   getCartController,
-  removeItemCartController,
+  // removeItemCartController,
 } = require("../controllers/cartController");
 
 router.post("/cart", addCartController);

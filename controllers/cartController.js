@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const Cart = require("../models/Cart");
 const User = require("../models/User");
 
+const jwt = require("jsonwebtoken")
 const addCartController = async (req, res) => {
   try {
 
@@ -10,6 +11,7 @@ const addCartController = async (req, res) => {
     const token = authHeader.split(" ")[1];
     
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+     //console.log(decodedToken);
       
     // get Data
     const { productId, quantity } = req.body;
@@ -17,6 +19,7 @@ const addCartController = async (req, res) => {
     if (!decodedToken || !productId || !quantity)
       return res.status(400).json({ msg: "Missing Data" });
 
+    const userId = decodedToken.id
     const user = await User.findById(userId);
 
     if (!user) return res.status(404).json({ msg: "User Not Found" });
