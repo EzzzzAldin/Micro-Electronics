@@ -65,7 +65,7 @@ const getSearchProductController = async (req, res) => {
 };
 
 const removeProduct = async (req,res)=>{
-     
+     //test
     try{
         const{userId,}=req.query;
     }
