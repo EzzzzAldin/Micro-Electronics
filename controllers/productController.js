@@ -40,6 +40,7 @@ const addProductController = async (req, res) => {
     res.status(500).json({ msg: "Server Error" });
   }
 };
+
 const getProductController = async (req, res) => {
   try {
     const products = await Product.find();
@@ -48,6 +49,7 @@ const getProductController = async (req, res) => {
     res.status(500).json({ msg: "Server Error" });
   }
 };
+
 const getSearchProductController = async (req, res) => {
   try {
     const { id } = req.query;
@@ -64,8 +66,46 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+const deleteProduct = async (req,res) => {
+  try {
+
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can delete product" });
+    }
+
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({ msg: "ID is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ msg: "Invalid Data" });
+    }
+
+    const deletedItem = await Product.findByIdAndDelete(id);
+
+    if (!deletedItem) {
+      return res.status(404).json({ msg: "Product not found" });
+    }
+
+    res.status(200).json({
+      msg: "Product deleted successfully", deletedItem});
+
+  } catch (error) {
+    res.status(500).json({msg: "Server Error", error: error.message});
+  }
+}
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  deleteProduct
 };

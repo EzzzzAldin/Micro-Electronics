@@ -4,10 +4,17 @@ const User = require("../models/User");
 
 const addCartController = async (req, res) => {
   try {
+
+    const authHeader = req.headers.authorization;
+    
+    const token = authHeader.split(" ")[1];
+    
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      
     // get Data
-    const { userId, productId, quantity } = req.body;
+    const { productId, quantity } = req.body;
     // Validated Data
-    if (!userId || !productId || !quantity)
+    if (!decodedToken || !productId || !quantity)
       return res.status(400).json({ msg: "Missing Data" });
 
     const user = await User.findById(userId);
@@ -51,8 +58,13 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
+
+
   } catch (error) {}
 };
+
+
+
 const removeItemCartController = async (req, res) => {
   try {
   } catch (error) {}
