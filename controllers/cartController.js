@@ -51,11 +51,69 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    const cart = await Cart.findOne({ user: decodedToken.id })
+      .populate("items.product");
+
+    if (!cart) {
+      return res.status(404).json({ msg: "Cart is empty" });
+    }
+
+    let totalPrice = 0;
+
+    cart.items.forEach(item => {
+      totalPrice += item.quantity * item.product.price;
+    });
+
+    cart.totalPrice = totalPrice;
+    await cart.save();
+
+    res.json({
+      success: true,
+      totalPrice,
+      items: cart.items
+    });
+
+  } catch (error) {
+    res.status(500).json({ msg: "Server error" });
+  }
 };
 const removeItemCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    const { productId } = req.params;
+
+    const cart = await Cart.findOne({ user: decodedToken.id });
+
+    if (!cart) {
+      return res.status(404).json({ msg: "Cart not found" });
+    }
+
+    cart.items = cart.items.filter(item =>
+      !item.product.equals(productId)
+    );
+    await cart.save();
+
+    res.json({
+      success: true,
+      msg: "Item removed successfully",
+      data: cart
+    });
+
+  } catch (error) {
+    res.status(500).json({ msg: "Server error" });
+  }
+
 };
 
 module.exports = {

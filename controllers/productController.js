@@ -64,8 +64,36 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+const removeProudct = async (req,res)=>{
+  try{
+    const authHeader = req.headers.authorization;
+    
+    const token = authHeader.split(" ")[1];
+    
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can remove products" });
+    }
+    const proudct = await Product.findByIdAndDelete(req.params.id);
+
+     if (!proudct) {
+      return res.status(404).json({
+        success: false,
+        message: "proudct not found"
+      });
+    }
+  }
+ catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+}
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  removeProudct
 };
