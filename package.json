@@ -14,6 +14,15 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.1"
-  }
+    "mongoose": "^9.2.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EzzzzAldin/Micro-Electronics.git"
+  },
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/EzzzzAldin/Micro-Electronics/issues"
+  },
+  "homepage": "https://github.com/EzzzzAldin/Micro-Electronics#readme"
 }

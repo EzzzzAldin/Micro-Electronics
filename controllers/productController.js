@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 
 const jwt = require("jsonwebtoken");
+const { removeItemCartController } = require("./cartController");
 
 const addProductController = async (req, res) => {
   try {
@@ -30,6 +31,7 @@ const addProductController = async (req, res) => {
       return res.status(400).json({ msg: "Only admin can add products" });
     }
 
+
     const product = await Product.create({
       name,
       price,
@@ -44,6 +46,7 @@ const getProductController = async (req, res) => {
   try {
     const products = await Product.find();
     res.json(products);
+
   } catch (error) {
     res.status(500).json({ msg: "Server Error" });
   }
@@ -64,8 +67,40 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+const removeProductController = async (req, res) => {
+  try {
+    
+    // get Token
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can add products" });
+    }
+
+    const { id } = req.query;
+
+    if (!id) return res.status(400).json({ msg: "Missing ID" });
+
+    const product = await Product.findById(id);
+
+    if (!product) return res.status(404).json({ msg: "Product not found" });
+
+    await Product.findByIdAndDelete(id);
+
+    await removeItemCartController(id);
+    res.json({ msg: "Product removed" });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  removeProductController
 };
