@@ -74,25 +74,23 @@ const removeProductController = async (req, res) => {
     const authHeader = req.headers.authorization;
 
     const token = authHeader.split(" ")[1];
-
+    // console.log(token)
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
-
-    if (decodedToken.role !== "admin") {
+    // console.log(decodedToken)
+    if (decodedToken.role != "admin") {
       return res.status(400).json({ msg: "Only admin can add products" });
     }
 
     const { id } = req.query;
 
-    if (!id) return res.status(400).json({ msg: "Missing ID" });
+    if (!id) return res.status(400).json({ msg: "Missing ID" ,data:id});
 
     const product = await Product.findById(id);
 
     if (!product) return res.status(404).json({ msg: "Product not found" });
 
     await Product.findByIdAndDelete(id);
-
-    await removeItemCartController(id);
-    res.json({ msg: "Product removed" });
+    res.status(200).json({ msg: "Product removed" });
   } catch (error) {
     console.log(error);
   }
