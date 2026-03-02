@@ -51,11 +51,56 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const { userId } = req.query;
+
+    if ( !userId ) return res.status( 400 ).json( { msg: "Missing User ID" } );
+
+    const cart = await Cart.findOne( { user: userId } ).populate( "items.product" );
+
+    if ( !cart ) return res.status( 404 ).json( { msg: "Cart Not Found" } );
+
+    res.json( cart );
+
+  } catch ( error ) {
+    res.status( 500 ).json( { msg: "Server Error" } );
+  }
 };
+
+
+
 const removeItemCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const { userId, productId } = req.body;
+    if ( !userId || !productId ) return res.status( 400 ).json( { msg: "Missing Data" } );
+
+    const cart = await Cart.findOne( { user: userId } );
+
+    if ( !cart ) return res.status( 404 ).json( { msg: "Cart Not Found" } );
+
+    const itemsIndex = cart.items.findIndex( ( item ) => {
+      item.product.equals( productId );
+    } );
+
+    if ( itemsIndex === -1 ) return res.status( 404 ).json( { msg: "Product Not Found In Cart" } );
+
+    const product = await Product.findById( productId );
+
+    if ( !product ) return res.status( 404 ).json( { msg: "Product Not Found" } );
+
+    product.stock += cart.items[ itemsIndex ].quantity;
+    
+    await product.save();
+
+    cart.items.splice( itemsIndex, 1 );
+
+    await cart.save();
+
+    res.json( { msg: "Done Remove Product From Cart", data: cart } );
+
+    
+  } catch (error) {
+    res.status( 500 ).json( { msg: "Server Error" } );
+    }
 };
 
 module.exports = {
