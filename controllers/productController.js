@@ -21,7 +21,6 @@ const addProductController = async (req, res) => {
 
     // get Token
     const authHeader = req.headers.authorization;
-
     const token = authHeader.split(" ")[1];
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
@@ -37,7 +36,7 @@ const addProductController = async (req, res) => {
     });
     res.status(201).json({ msg: "Product created", product });
   } catch (error) {
-    res.status(500).json({ msg: "Server Error" });
+    res.status(500).json({ msg: "Server Error" ,data:error.message});
   }
 };
 const getProductController = async (req, res) => {
@@ -64,8 +63,39 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+const removeProductController = async (req, res) => {
+  try {
+    const { id } = req.query;
+
+    if (!id) return res.status(400).json({ msg: "Missing ID" });
+
+    // get Token
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can add products" });
+    }
+
+    // validate product if found delete if not product not found
+    const product = await Product.findById(id);
+
+    if (!product){
+      return res.status(404).json({ msg: "Product not found" });
+    }else{
+      const delete_product = await product.deleteOne({id})
+      return res.status(200).json({msg:"Product removed Successfully",data:delete_product})
+    }
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error",data:error.message });
+  }
+};
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  removeProductController
 };

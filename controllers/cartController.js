@@ -1,7 +1,7 @@
 const Product = require("../models/Product");
 const Cart = require("../models/Cart");
 const User = require("../models/User");
-
+const jwt = require("jsonwebtoken")
 const addCartController = async (req, res) => {
   try {
     // get Data
@@ -51,10 +51,35 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    // get Token
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decodedToken.id)
+    if(!user) return res.status(404).json({msg:"User Not Found"})
+    const cart = await Cart.findOne({user:user._id})
+    if(!cart) return res.status(404).json({msg:"Cart Not Found"})
+    // response
+    res.status(200).json({msg:"Cart Returned Successfully",data:cart})
+  } catch (error) {
+    res.status(400).json({msg:"Error Returning Cart",data:error.message})
+  }
 };
 const removeItemCartController = async (req, res) => {
   try {
+      //get data
+      const authHeader = req.headers.authorization;
+      const token = authHeader.split(" ")[1];
+      const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      //validate data
+      const user = User.findById(decodedToken.id)
+      if(!user) return res.status(404).json({msg:"User Not Found"})
+      
+      const cart = await Cart.findOne({user:user._id})
+      if(!cart) return res.status(404).json({msg:"Cart Not Found"})
+      // remove item from cart
+      console.log(cart);
+      // response
   } catch (error) {}
 };
 
