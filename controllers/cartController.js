@@ -1,6 +1,7 @@
 const Product = require("../models/Product");
 const Cart = require("../models/Cart");
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 const addCartController = async (req, res) => {
   try {
@@ -10,18 +11,33 @@ const addCartController = async (req, res) => {
     if (!userId || !productId || !quantity)
       return res.status(400).json({ msg: "Missing Data" });
 
-    const user = await User.findById(userId);
+    // const user = await User.findById(userId);
 
-    if (!user) return res.status(404).json({ msg: "User Not Found" });
+    // if (!user) return res.status(404).json({ msg: "User Not Found" });
 
-    const product = await Product.findById(productId);
+    // const product = await Product.findById(productId);
 
-    if (!product) return res.status(404).json({ msg: "Product Not Found" });
+    // if (!product) return res.status(404).json({ msg: "Product Not Found" });
+
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+
+     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    
+        if (decodedToken.role !== "admin") {
+          return res.status(400).json({ msg: "Only admin can add cart" })
+        ;
+      }
+      const cart = await cart.create({
+        user,
+        items
+      });
+
 
     if (quantity > product.stock)
       return res.json({ msg: "quantity Large Stock " });
 
-    let cart = await Cart.findOne({ user: userId });
+    // let cart = await Cart.findOne({ user: userId });
 
     if (!cart) cart = await Cart.create({ user, items: [] });
 
@@ -51,10 +67,29 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+
+     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    
+       const cart = await Cart.findOne({ 
+        user: decodedToken.id }) .populate("items.product");
+        if (!cart)
+      return res.status(404).json({ msg: "Cart Not Found" });
+
+    res.status(200).json({
+      msg: "Success",
+      data: cart,
+    });
+
+  } catch (error) {
+    res.status(401).json({ msg: "Invalid Token" });
+  }
 };
+
 const removeItemCartController = async (req, res) => {
   try {
+    
   } catch (error) {}
 };
 
