@@ -51,10 +51,41 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const {user ,items}= req.body
+
+    if(!user || !items) return res.status(400).json({msg:"must add all data"})
+        const authHeader = req.headers.authorization;
+      
+          const token = authHeader.split(" ")[1];
+      
+          const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+      
+          if (decodedToken.role !== "user") {
+            return res.status(400).json({ msg: "Only admin can add products" });
+          }
+    
+      const cart = await Cart.find()
+      res.status(201).json({data : cart, msg:"geted"})
+  } catch (error) {res.status(500).json({msg:"server error"})}
 };
 const removeItemCartController = async (req, res) => {
   try {
+      const authHeader = req.headers.authorization;
+    
+        const token = authHeader.split(" ")[1];
+    
+        const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    
+        if (decodedToken.role !== "admin") {
+          return res.status(400).json({ msg: "Only admin can add products" });
+        }
+
+    if(!cart) return res.status(404).json({msg:"not found"})
+
+    const cart = await Cart.findByIdAndDelete(req.params.id)
+
+    res.status(201).json({msg:"deleted"})
+    
   } catch (error) {}
 };
 

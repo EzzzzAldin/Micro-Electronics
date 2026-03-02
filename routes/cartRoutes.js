@@ -9,7 +9,7 @@ const {
 } = require("../controllers/cartController");
 
 router.post("/cart", addCartController);
-
 router.get("/cart", getCartController);
+router.delete("/cart/:id" , removeItemCartController)
 
 module.exports = router;

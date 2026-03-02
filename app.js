@@ -8,7 +8,7 @@ app.use(express.json());
 const port = process.env.PORT || 3000;
 async function dbConnection() {
   try {
-    await mongoose.connect(process.env.DB_URL);
+    await mongoose.connect(process.env.DB_URI);
     console.log("MongoDB Connected!");
   } catch (error) {
     console.log(error);
