@@ -51,11 +51,29 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const authHeader = req.headers.authorization;
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    const cart = await Cart.findOne({
+      user: decodedToken.id
+    }).populate("items.product");
+    if (!cart)
+      return res.status(404).json({ msg: "Cart Not Found" });
+
+    res.status(200).json({
+      msg: "Success",
+      data: cart,
+    });
+
+  } catch (error) {
+    res.status(401).json({ msg: "Invalid Token" });
+  }
 };
 const removeItemCartController = async (req, res) => {
   try {
-  } catch (error) {}
+  } catch (error) { }
 };
 
 module.exports = {
