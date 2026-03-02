@@ -64,8 +64,24 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+const removePorductByAdmin = async(req, res)=>{
+  try{
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).send('Product not found');
+    }
+    res.status(200).json({ message: 'Product removed' });
+  }catch(error){
+    res.status(422).json({
+      status: "fail",
+      message: error.message
+    })
+  }
+}
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  removePorductByAdmin
 };

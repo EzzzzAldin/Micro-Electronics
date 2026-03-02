@@ -63,6 +63,7 @@ const login = async (req, res) => {
         expiresIn: "1d",
       },
     );
+    console.log(token);
 
     res.status(200).json({
       msg: "Success Login",
