@@ -5,12 +5,10 @@ const mongoose = require("mongoose");
 const app = express();
 app.use(express.json());
 
-const port = process.env.PORT || 5000;
-const mongoUrl = process.env.MONGO_URL
-
+const port = process.env.PORT || 3000;
 async function dbConnection() {
   try {
-    await mongoose.connect(mongoUrl);
+    await mongoose.connect(process.env.DB_URL);
     console.log("MongoDB Connected!");
   } catch (error) {
     console.log(error);
