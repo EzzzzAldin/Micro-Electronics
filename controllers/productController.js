@@ -51,7 +51,8 @@ const getProductController = async (req, res) => {
 const getSearchProductController = async (req, res) => {
   try {
     const { id } = req.query;
-
+    console.log(id);
+    
     if (!id) return res.status(400).json({ msg: "Missing ID" });
 
     const product = await Product.findById(id);
@@ -64,8 +65,35 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+const deleteProduct = async (req, res) =>{
+  try {
+    const {id} = req.params;
+    const authHeader = req.headers.authorization;
+    
+    const token = authHeader.split(" ")[1];
+    
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    
+    if (decodedToken.role !== "admin") {
+      return res.status(400).json({ msg: "Only admin can delete products" });
+    }
+    
+    const product = await Product.findByIdAndDelete(id);
+
+    if(!product)
+      return res.status(404).json({msg: "Product not founded"});
+
+    return res.status(200).json({msg: "Product deleted Successfully"});
+
+  } catch(error){
+    console.log(error);
+    res.status(500).json({msg: "Server Error!", error: error.message});
+  }
+}
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  deleteProduct
 };
