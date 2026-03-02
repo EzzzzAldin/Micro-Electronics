@@ -49,14 +49,63 @@ const addCartController = async (req, res) => {
   }
 };
 
+
+
+
+
+
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+   const authHeader = req.headers.authorization;
+       const token = authHeader.split(" ")[1];
+       const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+
+        const userId = decodedToken.id;
+      const cart = await Cart.findOne({ user: userId });
+      if (!cart) return res.status(404).json({ msg: "Cart Not Found" });
+      res.json(cart);
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
+
+
+
+
+
 const removeItemCartController = async (req, res) => {
   try {
-  } catch (error) {}
-};
+// get Data
+    const authHeader = req.headers.authorization;
+       const token = authHeader.split(" ")[1];
+   // Validated Data
+       const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+        const userId = decodedToken.id
+
+
+        const { productId } = req.body;   
+    if (!user || user.role !== "admin") return res.status(404).json({ msg: "User Not Found or Not Admin" });
+// Check Cart
+    let cart = await Cart.findOne({ user: userId });
+    if (!cart) return res.status(404).json({ msg: "Cart Not Found" });
+    
+const productIndex = cart.items.findIndex((item) => item.product.equals(productId));
+    if (productIndex === -1) return res.status(404).json({ msg: "Item Not Found In Cart" });
+    // Remove Item From Cart
+    cart.items.splice(productIndex, 1);
+    await cart.save();
+// Update Stock
+    const product = await Product.findById(productId);
+    // Check Product
+    if (!product) return res.status(404).json({ msg: "Product Not Found" });
+    product.stock += cart.items[productIndex].quantity;
+        // Save Product
+    await product.save(); 
+    res.json({ msg: "Item Removed From Cart" });
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
+};   
 
 module.exports = {
   addCartController,
