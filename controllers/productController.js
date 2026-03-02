@@ -84,7 +84,7 @@ const deleteProductController = async (req, res) => {
 
     // 3. Role Check
     if (decodedToken.role !== "admin") {
-      return res.status(403).json({ msg: "Only admin can delete products" });
+      return res.status(403).json({ msg: "You're not admin - Only admin can delete products" });
     }
 
     // 4. Delete the product
