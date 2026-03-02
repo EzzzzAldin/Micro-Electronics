@@ -51,11 +51,68 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+
+const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+
+
+ let cart = await Cart.findOne({ user: decodedToken.id });
+if (!cart) return res.status(404).json({ msg: "Product Not Found" })
+
+res.status(200).json({
+      msg: "get cared ",
+      data: cart,
+    });
+
+
+  } catch (error) {
+    res.status(500).json({ msg: "Server Error" });
+  }
 };
+
 const removeItemCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const { productId } = req.body;
+
+
+
+const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+const userId = decodedToken.id
+
+
+    if (!productId || !userId) return res.status(400).json({ msg: "data invalid" });
+
+    let cart = await Cart.findOne({ user: userId });
+    if (!cart) return res.status(404).json({ msg: "Cart not found" });
+
+    const index = cart.items.findIndex(itm => itm.product.toString() === productId);
+
+    if (index > -1) {
+      const itemQuantity = cart.items[index].quantity;
+      
+      await Product.findByIdAndUpdate(productId, { $inc: { stock: itemQuantity } });
+
+      cart.items.splice(index, 1);
+
+      await cart.save();
+
+      return res.status(200).json({ msg: "Item removed and stock updated", data: cart });
+    } else {
+      return res.status(404).json({ msg: "Product not found in your cart" });
+    }
+
+  } catch (error) {
+    res.status(500).json({ msg: "Error server" });
+  }
 };
 
 module.exports = {
@@ -63,3 +120,5 @@ module.exports = {
   getCartController,
   removeItemCartController,
 };
+
+
