@@ -20,6 +20,7 @@ const addProductController = async (req, res) => {
     // }
 
     // get Token
+    // function token(){}
     const authHeader = req.headers.authorization;
 
     const token = authHeader.split(" ")[1];
@@ -30,6 +31,7 @@ const addProductController = async (req, res) => {
       return res.status(400).json({ msg: "Only admin can add products" });
     }
 
+    
     const product = await Product.create({
       name,
       price,
@@ -40,6 +42,32 @@ const addProductController = async (req, res) => {
     res.status(500).json({ msg: "Server Error" });
   }
 };
+//remove product by admin
+const removeProductByAdmin = async (req, res) =>{
+  try{
+    const authHeader = req.headers.authorization;
+
+    const token = authHeader.split(" ")[1];
+
+    const encryptedToken = jwt.verify(token, process.env.JWT_SECRET);
+    if(encryptedToken.role !== "admin"){
+      return res.status(403).json({msg: "only admin approved to do that"});
+    }
+    const {id} = req.params;
+    const product = await Product.findByIdAndDelete(id);
+    if (!product){
+      return res.status(404).json({msg: "Product not found"});
+    }
+    res.status(200).json({msg: "Product removed", data: product});
+    // console.log(id);
+
+  }catch(err){
+    res.status(500).json({msg: err.message});
+    console.log(err.message)
+  }
+
+
+}
 const getProductController = async (req, res) => {
   try {
     const products = await Product.find();
@@ -50,8 +78,9 @@ const getProductController = async (req, res) => {
 };
 const getSearchProductController = async (req, res) => {
   try {
-    const { id } = req.query;
 
+    const { id } = req.query; // shortcut for this: 
+    // const id  = req.query.id;
     if (!id) return res.status(400).json({ msg: "Missing ID" });
 
     const product = await Product.findById(id);
@@ -64,8 +93,14 @@ const getSearchProductController = async (req, res) => {
   }
 };
 
+
+
+
+
+
 module.exports = {
   addProductController,
   getProductController,
   getSearchProductController,
+  removeProductByAdmin,
 };

@@ -11,5 +11,5 @@ const {
 router.post("/cart", addCartController);
 
 router.get("/cart", getCartController);
-
+router.delete("cart/:productId", removeItemCartController);
 module.exports = router;

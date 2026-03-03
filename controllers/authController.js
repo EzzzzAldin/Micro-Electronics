@@ -31,6 +31,8 @@ const register = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+         res.status(500).json({ msg: "Server Error", details: error.message});
+
   }
 };
 
@@ -70,6 +72,7 @@ const login = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+     res.status(500).json({ msg: "Server Error", details: error.message});
   }
 };
 
