@@ -4,9 +4,9 @@ const User = require("../models/User");
 
 const addCartController = async (req, res) => {
   try {
-    // get Data
+    // get data
     const { userId, productId, quantity } = req.body;
-    // Validated Data
+    // validated data
     if (!userId || !productId || !quantity)
       return res.status(400).json({ msg: "Missing Data" });
 
@@ -25,7 +25,7 @@ const addCartController = async (req, res) => {
 
     if (!cart) cart = await Cart.create({ user, items: [] });
 
-    // Add Product Or Updated quantity
+    // add product or updated quantity
     const itemsIndex = cart.items.findIndex((item) => {
       item.product.equals(productId);
     });
@@ -132,8 +132,8 @@ const removeItemCartController = async (req, res) => {
 
     // return the responed to the client
     res.status(200).json({ msg: "Item Removed From Cart", data: cart });
-  } catch (error) {
-    res.status(500).json({ msg: "Server Error" });
+  } catch (err) {
+    res.status(500).json({ msg: "Server Error", details: err.message});
   }
 };
 
