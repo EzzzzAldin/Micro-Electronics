@@ -26,6 +26,10 @@ app.use("/api", authRoutes);
 app.use("/api", productRoutes);
 app.use("/api", cartRoutes);
 
+const errorMiddleware = require("./Middlewares/errorMiddleware");
+
+app.use(errorMiddleware);
+
 // Run Server
 app.listen(port, () => {
   console.log(`Server running at port ${port}`);

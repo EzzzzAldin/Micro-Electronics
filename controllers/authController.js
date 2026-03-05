@@ -5,8 +5,9 @@ const bcrypt = require("bcrypt");
 
 const { registerSchema, loginSchema } = require("./validation/authValidation");
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
+    // throw new Error("Register Controller Error Test");
     // Joi Validation
     const { error, value } = registerSchema.validate(req.body, {
       abortEarly: false,
@@ -41,7 +42,7 @@ const register = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
 
