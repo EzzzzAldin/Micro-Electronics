@@ -3,8 +3,14 @@ const User = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const registerSchema = require("./validation/registerSchema");
+
 const register = async (req, res) => {
   try {
+    const { error, value } = registerSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true,
+    });
     // get Data
     const { username, email, password, role } = req.body;
     // Validated Data

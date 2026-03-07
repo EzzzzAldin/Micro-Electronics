@@ -2,15 +2,27 @@ const Product = require("../models/Product");
 const Cart = require("../models/Cart");
 const User = require("../models/User");
 
+const jwt = require("jsonwebtoken");
+
 const addCartController = async (req, res) => {
   try {
     // get Data
-    const { userId, productId, quantity } = req.body;
+    const { productId, quantity } = req.body;
     // Validated Data
-    if (!userId || !productId || !quantity)
+    if (!productId || !quantity)
       return res.status(400).json({ msg: "Missing Data" });
 
+    // Get Token From Headers
+    // const authHeaders = req.headers.authorization;
+
+    // const token = authHeaders.split(" ")[1];
+
+    // const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+
+    const userId = req.user.id;
+
     const user = await User.findById(userId);
+    // return console.log(user);
 
     if (!user) return res.status(404).json({ msg: "User Not Found" });
 
@@ -51,7 +63,15 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-  } catch (error) {}
+    const userId = req.user.id;
+    // find cart
+    const cart = await Cart.findOne({ user: userId });
+    res.json({
+      data: cart,
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 const removeItemCartController = async (req, res) => {
   try {
