@@ -5,6 +5,10 @@ const addProductSchema = require("./validation/productsValidation");
 
 const addProductController = async (req, res) => {
   try {
+    if (!req.file) {
+      return res.status(400).json({ msg: "Product image is required" });
+    }
+
     const { error, value } = addProductSchema.validate(req.body, {
       abortEarly: false,
       stripUnknown: true,
@@ -17,7 +21,7 @@ const addProductController = async (req, res) => {
       });
     }
 
-    const { name, price, stock, userId } = value;
+    // const { name, price, stock, userId } = value;
 
     // if (!name || !price || !stock)
     //   return res.status(400).json({ msg: "Missing data" });
@@ -30,6 +34,8 @@ const addProductController = async (req, res) => {
     // if (!checkAdmin) {
     //   return res.status(400).json({ msg: "User not found" });
     // }
+
+    value.image = req.file.path;
 
     const product = await Product.create(value);
     res.status(201).json({ msg: "Product created", product });
