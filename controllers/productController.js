@@ -2,6 +2,7 @@ const Product = require("../models/Product");
 const User = require("../models/User");
 
 const jwt = require("jsonwebtoken");
+const addProductSchema = require("../validation/productValdtation")
 
 const addProductController = async (req, res) => {
   try {
@@ -23,6 +24,7 @@ const addProductController = async (req, res) => {
     // function token(){}
     const authHeader = req.headers.authorization;
 
+    if (!authHeader) return res.status(401).json({ msg: "No token provided" }); // check that the reauest has a token
     const token = authHeader.split(" ")[1];
 
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
@@ -39,7 +41,9 @@ const addProductController = async (req, res) => {
     });
     res.status(201).json({ msg: "Product created", product });
   } catch (error) {
-    res.status(500).json({ msg: "Server Error" });
+    res.status(500).json({ msg: "Server Error", details: error.message });
+        console.log(error.message)
+
   }
 };
 //remove product by admin
@@ -73,7 +77,7 @@ const getProductController = async (req, res) => {
     const products = await Product.find();
     res.json(products);
   } catch (error) {
-    res.status(500).json({ msg: "Server Error" });
+    res.status(500).json({ msg: "Server Error", details: error.message });
   }
 };
 const getSearchProductController = async (req, res) => {
@@ -90,6 +94,8 @@ const getSearchProductController = async (req, res) => {
     res.json(product);
   } catch (error) {
     res.status(500).json({ msg: "Server Error" });
+        console.log(error.message)
+
   }
 };
 

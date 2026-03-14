@@ -2,14 +2,25 @@ const User = require("../models/User");
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const {registerSchema, loginSchema} = require("./validation/registerSchema");
 const register = async (req, res) => {
   try {
     // get Data
-    const { username, email, password, role } = req.body;
+    const {error, value} = registerSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true
+    })
+    // return console.log(error.value);
+    // const { username, email, password, role } = req.body;
+    if (error){
+      return res.status(400).json({msg: error.details.map(err=>err.message)})
+    };
+        const { username, email, password, role } = value;
+
     // Validated Data
-    if (!username || !email || !password)
-      return res.status(400).json({ msg: "Missing Data" });
+    // if (!username || !email || !password)
+    //   return res.status(400).json({ msg: "Missing Data" });
+
 
     const existUser = await User.findOne({ email });
     if (existUser)
@@ -38,11 +49,22 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
+     // get Data
+    const {error, value} = loginSchema.validate(req.body, {
+      abortEarly: false,
+      stripUnknown: true
+    })
+    // return console.log(error.value);
+    // const { username, email, password, role } = req.body;
+    if (error){
+      return res.status(400).json({msg: error.details.map(err=>err.message)})
+    };
+        // const { username, email, password, role } = ;
     // Get Data
-    const { email, password } = req.body;
+    const { email, password } = value;
     // Validated Data
-    if (!email || !password)
-      return res.status(400).json({ msg: "Missing Data" });
+    // if (!email || !password)
+    //   return res.status(400).json({ msg: "Missing Data" });
 
     const user = await User.findOne({ email });
     if (!user)

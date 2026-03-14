@@ -1,16 +1,19 @@
 const Product = require("../models/Product");
 const Cart = require("../models/Cart");
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
+const secret = process.env.JWT_SECRET;
 const addCartController = async (req, res) => {
   try {
     // get data
-    const { userId, productId, quantity } = req.body;
+    const { productId, quantity } = req.body;
+    const userId = req.user.id;
     // validated data
     if (!userId || !productId || !quantity)
       return res.status(400).json({ msg: "Missing Data" });
 
-    const user = await User.findById(userId);
+    const user = await User.findById(decodedToken.id);
 
     if (!user) return res.status(404).json({ msg: "User Not Found" });
 
@@ -26,9 +29,9 @@ const addCartController = async (req, res) => {
     if (!cart) cart = await Cart.create({ user, items: [] });
 
     // add product or updated quantity
-    const itemsIndex = cart.items.findIndex((item) => {
-      item.product.equals(productId);
-    });
+    const itemsIndex = cart.items.findIndex((item) => 
+      item.product.equals(productId)
+    );
 
     if (itemsIndex > -1) {
       cart.items[itemsIndex].quantity += quantity;
@@ -51,7 +54,8 @@ const addCartController = async (req, res) => {
 
 const getCartController = async (req, res) => {
   try {
-    const {userId} = req.body; // getting params from the body
+   const userId = req.user.id;
+    // const {userId} = req.body; // getting params from the body
     if(!userId) return res.status(400).json({msg: "missing data userId not founded"}) // second we check that we got the data we wnated
     // after we need to check if this user is in the collection data or not
     const user = await User.findById(userId);
@@ -62,17 +66,41 @@ const getCartController = async (req, res) => {
   if (!cart) return res.status(404).json({msg: "not founded"});
   // when we found it
   res.status(200).json({msg: "success", data: cart});
-  } catch (error) {}
+  } catch (err) { 
+     res.status(500).json({ msg: "server srror", details: err.message });
+}
 };
 
+// const getcaaar= async (req, res)=>{
+//   try {
 
+//     // const authHeader = req.headers.authorization;
+//     // // console.log(authHeader)
+//     // const token = authHeader.split(" ")[1];
+//     // // console.log(token);
+//     // const decodedToken = jwt.verify(token, secret);
+//     // // console.log(decodedToken);
+//     // const userId = decodedToken.id
+//     const userId = req.user.id;
+// // const userId = req.user.id;
+
+//     const cart = await Cart.findOne({user: userId})
+//     console.log(cart);
+
+//   }catch(err){
+
+//   }
+// }
 
 
 
 const removeItemCartController = async (req, res) => {
   try {
     // get data from the body
-    const { userId, productId } = req.body;
+    // const { userId} = req.body;
+    const userId = req.user.id;
+
+    const {productId} = req.params;
 
     // check that we found the data we requset for
     if (!userId || !productId)
