@@ -8,7 +8,15 @@ const {
   getSearchProductController,
 } = require("../controllers/productController");
 
-router.post("/product", addProductController);
+const uploadProductImage = require("../Middleware/uploadImages");
+const authMiddleware = require("../Middleware/authMiddleware");
+
+router.post(
+  "/product",
+  authMiddleware,
+  uploadProductImage,
+  addProductController,
+);
 
 router.get("/products", getProductController);
 router.get("/products/search", getSearchProductController);
